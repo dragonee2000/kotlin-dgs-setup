@@ -1,0 +1,106 @@
+type Query {
+    products(title: string): [Product]
+}
+
+type Mutation {
+    addProduct(product: Product): [Product]
+}
+
+union SpecificationType = [SpecificationData] | JSON
+
+type Product {
+    id: ID!
+    title: String!
+    description: String!
+    brand: String!
+    category: String!
+    subCategory: String!
+    modelNumber: String!
+    productCode: String!
+    price: [Price]!
+    quantity: Int!
+    specifications: [SpecificationType]
+    images: [String]
+    inTheBox: []
+    reviews: [ProductReview]
+}
+
+type SpecificationData {
+    title: String!
+    specification: String!
+}
+
+type InTheBox {
+    productID: ID!
+    quantity: Int!
+}
+
+enum MediaFormat {
+    IMAGE
+    VIDEO
+}
+
+type Price {
+    amount: Int!
+    currency: AllowedCurrency!
+}
+
+enum AllowedCurrency {
+    MYR
+    USD
+    SGD
+}
+
+type ProductReview {
+    title: String!
+    body: String!
+    starScore: Int
+    username: String
+    submittedDate: DateTime
+}
+
+input SubmittedReview { 
+    productId: Int!
+    username: String!
+    starScore: Int!
+}
+
+type ProductCollection {
+    id: ID!
+    title: String!
+    description: String!
+    productCode: String!
+    conditionType: ConditionType!
+    collection: [ID]!
+}
+
+enum ConditionType { 
+    manual
+    automatic
+}
+
+type ProductBundle {
+    id: ID!
+    title: String!
+    subTitle: String
+    description: String!
+    productCode: String!
+    products: [ProductInBundle]!
+    price: [Price]!
+    usage: [Usage]!
+    images: [String]!
+}
+
+type Usage {
+    description: String!
+}
+
+# product and the quantity in the bundle
+# eg: 2 drills and a hammer in a set
+type ProductInBundle {
+    productId: ID!
+    quantity: Int!
+}
+
+scalar DateTime
+scalar JSON

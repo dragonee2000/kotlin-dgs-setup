@@ -31,6 +31,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation(platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:latest.release"))
 	implementation("com.netflix.graphql.dgs:graphql-dgs-spring-boot-starter")
+    implementation("com.netflix.graphql.dgs:graphql-dgs-extended-scalars")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
