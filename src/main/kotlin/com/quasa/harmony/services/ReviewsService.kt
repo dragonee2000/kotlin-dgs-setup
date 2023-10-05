@@ -33,8 +33,8 @@
  import org.springframework.beans.factory.InitializingBean
  
  interface ReviewsService {
-     fun reviewsForProduct(productId: Int): List<ProductReview>?
-     fun reviewsForProducts(productIds: List<Int>): Map<Int, List<ProductReview>>
+     fun reviewsForProduct(productId: String): List<ProductReview>?
+     fun reviewsForProducts(productIds: List<String>): Map<String, List<ProductReview>>
      fun saveReview(reviewInput: SubmittedReview)
      fun getReviewsPublisher(): Publisher<ProductReview>
  }
@@ -48,7 +48,7 @@
  class DefaultReviewsService(private val productsService: ProductsService): ReviewsService, InitializingBean {
      private val logger = LoggerFactory.getLogger(ReviewsService::class.java)
  
-     private val reviews = mutableMapOf<Int, MutableList<ProductReview>>()
+     private val reviews = mutableMapOf<String, MutableList<ProductReview>>()
      private lateinit var reviewsStream : FluxSink<ProductReview>
      private lateinit var reviewsPublisher: ConnectableFlux<ProductReview>
  
@@ -56,20 +56,20 @@
          val faker = Faker()
  
          //For each show we generate a random set of reviews.
-         productsService.products().forEach { show ->
+         productsService.products().forEach { product ->
              val generatedReviews = IntStream.range(0, faker.number().numberBetween(1, 20)).mapToObj {
                  val date =
                      faker.date().past(300, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
                  ProductReview(
-                    title = faker.name().username(),
-                    body = faker.text().characters(),
+                    title = faker.appliance().brand(),
+                    body = faker.appliance().equipment(),
                     username = faker.name().username(),
                     starScore = faker.number().numberBetween(0, 6),
                     submittedDate = OffsetDateTime.of(date, ZoneOffset.UTC)
                  )
              }.toList().toMutableList()
  
-             reviews[show.id] = generatedReviews
+             reviews[product.id] = generatedReviews
          }
  
          val publisher = Flux.create<ProductReview> { emitter ->
@@ -84,25 +84,27 @@
  
  
      /**
-      * Hopefully nobody calls this for multiple shows within a single query, that would indicate the N+1 problem!
+      * Hopefully nobody calls this for multiple products within a single query, that would indicate the N+1 problem!
       */
-     override fun reviewsForProduct(showId: Int): List<ProductReview>? {
-         return reviews[showId]
+     override fun reviewsForProduct(productId: String): List<ProductReview>? {
+         return reviews[productId]
      }
  
      /**
-      * This is the method we want to call when loading reviews for multiple shows.
+      * This is the method we want to call when loading reviews for multiple products.
       * If this code was backed by a relational database, it would select reviews for all requested shows in a single SQL query.
       */
-     override fun reviewsForProducts(productIds: List<Int>): Map<Int, List<ProductReview>> {
-         logger.info("Loading reviews for shows ${showIds.joinToString()}")
+     override fun reviewsForProducts(productIds: List<String>): Map<String, List<ProductReview>> {
+         logger.info("Loading reviews for shows ${productIds.joinToString()}")
  
-         return reviews.filter { showIds.contains(it.key) }
+         return reviews.filter { productIds.contains(it.key) }
      }
  
      override fun saveReview(reviewInput: SubmittedReview) {
          val reviewsForMovie = reviews.getOrPut(reviewInput.productId, { mutableListOf() })
          val review = ProductReview(
+             title = reviewInput.title,
+             body = reviewInput.body,
              username = reviewInput.username,
              starScore = reviewInput.starScore,
              submittedDate = OffsetDateTime.now()

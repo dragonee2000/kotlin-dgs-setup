@@ -1,12 +1,35 @@
+scalar DateTime
+scalar JSON
+
 type Query {
-    products(title: string): [Product]
+    products(title: String): [Product]
 }
 
 type Mutation {
-    addProduct(product: Product): [Product]
+    addProduct(product: ProductInput): [Product]
 }
 
-union SpecificationType = [SpecificationData] | JSON
+input ProductInput {
+    id: ID!
+    title: String!
+    description: String!
+    brand: String!
+    category: String!
+    subCategory: String!
+    modelNumber: String!
+    productCode: String!
+    # this is the id from the currency table
+    price: ID!
+    quantity: Int!
+    specifications: JSON
+    images: [String]
+    inTheBox: [InTheBoxInput]
+}
+
+input InTheBoxInput {
+    productID: ID!
+    quantity: Int!
+}
 
 type Product {
     id: ID!
@@ -17,12 +40,19 @@ type Product {
     subCategory: String!
     modelNumber: String!
     productCode: String!
-    price: [Price]!
+    # this is the id from the currency table
+    price: ID!
     quantity: Int!
-    specifications: [SpecificationType]
+    specifications: JSON
     images: [String]
-    inTheBox: []
+    inTheBox: [InTheBox]
     reviews: [ProductReview]
+}
+
+type MultiCurrencyPriceTable {
+    priceId: ID!
+    price: Float!
+    currencyCode: String!
 }
 
 type SpecificationData {
@@ -40,11 +70,6 @@ enum MediaFormat {
     VIDEO
 }
 
-type Price {
-    amount: Int!
-    currency: AllowedCurrency!
-}
-
 enum AllowedCurrency {
     MYR
     USD
@@ -59,8 +84,10 @@ type ProductReview {
     submittedDate: DateTime
 }
 
-input SubmittedReview { 
-    productId: Int!
+input SubmittedReview {
+    title: String!
+    body: String!
+    productId: String!
     username: String!
     starScore: Int!
 }
@@ -86,7 +113,7 @@ type ProductBundle {
     description: String!
     productCode: String!
     products: [ProductInBundle]!
-    price: [Price]!
+    price: ID!
     usage: [Usage]!
     images: [String]!
 }
@@ -102,5 +129,4 @@ type ProductInBundle {
     quantity: Int!
 }
 
-scalar DateTime
-scalar JSON
+directive @skipcodegen on FIELD_DEFINITION

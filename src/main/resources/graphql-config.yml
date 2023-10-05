@@ -1,0 +1,4 @@
+schema: src/main/resources/schema/schema.graphql
+extendedScalars: true
+components:
+  - com.quasa.harmony.scalars.JsonScalarRegistration

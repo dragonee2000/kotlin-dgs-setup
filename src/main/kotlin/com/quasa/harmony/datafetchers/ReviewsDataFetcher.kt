@@ -1,6 +1,6 @@
 package com.quasa.harmony.datafetchers
 
-import com.quasa.harmony.dataloaders.ProductsDataLoader
+import com.quasa.harmony.dataloaders.ReviewsDataLoader
 import com.quasa.harmony.generated.DgsConstants
 import com.quasa.harmony.generated.types.ProductReview
 import com.quasa.harmony.generated.types.Product
@@ -12,11 +12,11 @@ import org.reactivestreams.Publisher
 import java.util.concurrent.CompletableFuture
 
 @DgsComponent
-class ReviewDataFetcher(private val reviewsService: ReviewService) {
+class ReviewDataFetcher(private val reviewsService: ReviewsService) {
     @DgsData(parentType = DgsConstants.PRODUCT.TYPE_NAME, field = DgsConstants.PRODUCT.Reviews)
     fun reviews(dfe: DgsDataFetchingEnvironment): CompletableFuture<List<ProductReview>> {
         //Instead of loading a DataLoader by name, we can use the DgsDataFetchingEnvironment and pass in the DataLoader classname.
-        val reviewsDataLoader: DataLoader<Int, List<ProductReview>> = dfe.getDataLoader(ReviewsDataLoader::class.java)
+        val reviewsDataLoader: DataLoader<String, List<ProductReview>> = dfe.getDataLoader(ReviewsDataLoader::class.java)
 
         // Because the reviews field is on Product, the getSource() method will return the Product instance
         val product: Product = dfe.getSource()
@@ -29,7 +29,7 @@ class ReviewDataFetcher(private val reviewsService: ReviewService) {
     fun addReview(@InputArgument review: SubmittedReview): List<ProductReview> {
         reviewsService.saveReview(review)
 
-        return reviewsService.reviewsForShow(review.showId)?: emptyList()
+        return reviewsService.reviewsForProduct(review.productId)?: emptyList()
     }
 
     @DgsSubscription

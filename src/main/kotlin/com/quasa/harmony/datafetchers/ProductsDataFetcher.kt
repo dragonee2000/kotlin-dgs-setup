@@ -25,7 +25,7 @@ import com.netflix.graphql.dgs.InputArgument
 import kotlinx.coroutines.coroutineScope
 
 @DgsComponent
-class ProductsDataFetcher(private val productService: ProductsService) {
+class ProductsDataFetcher(private val productsService: ProductsService) {
 
     /**
      * This datafetcher resolves the `products` field on Query.
